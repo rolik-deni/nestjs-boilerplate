@@ -18,14 +18,6 @@ export const typeOrmConfig: TypeOrmModuleAsyncOptions = {
             )
         }
 
-        let autoCreateSchema = false
-        let autoDropSchema = false
-
-        if (configService.get('NODE_ENV') === 'development-no-migration') {
-            autoCreateSchema = true
-            autoDropSchema = configService.get('DROP_DATABASE') === '1'
-        }
-
         return {
             type: 'postgres',
             entities: [`${__dirname}/../**/*.entity{.ts,.js}`],
@@ -34,8 +26,11 @@ export const typeOrmConfig: TypeOrmModuleAsyncOptions = {
             port: configService.get('PSQL_PORT') || DEFAULT_PSQL_PORT,
             username: configService.get('PSQL_USERNAME'),
             password: configService.get('PSQL_PASSWORD'),
-            synchronize: autoCreateSchema,
-            dropSchema: autoDropSchema,
+            synchronize:
+                configService.get('NODE_ENV') === 'development-no-migration',
+            dropSchema:
+                configService.get('NODE_ENV') === 'development-no-migration' &&
+                configService.get('DROP_DATABASE') === '1',
         }
     },
     inject: [ConfigService],
